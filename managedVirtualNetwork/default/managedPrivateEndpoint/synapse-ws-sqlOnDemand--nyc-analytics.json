@@ -1,0 +1,10 @@
+{
+	"name": "synapse-ws-sqlOnDemand--nyc-analytics",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/dd2648ef-ea63-4552-9c1f-d541c58f4e1f/resourceGroups/AzureDemos/providers/Microsoft.Synapse/workspaces/nyc-analytics",
+		"groupId": "sqlOnDemand",
+		"fqdns": [
+			"nyc-analytics-ondemand.3301c00e-e01d-4d20-acae-6267fb0f1020.sql.azuresynapse.net"
+		]
+	}
+}
