@@ -184,7 +184,7 @@
 					"name": "nyc_taxi/discovery"
 				},
 				"content": {
-					"query": "SELECT  *\nFROM\n    OPENROWSET(\n        BULK 'rate_code.json',\n        DATA_SOURCE = 'nyc_taxi_data_raw', \n        FORMAT = 'CSV',\n        \n        FIELDTERMINATOR = '0x0b',\n        ROWTERMINATOR = '0x0a',\n        FIELDQUOTE = '0x0b'\n    )WITH(\n\n        jsonDoc NVARCHAR(MAX)\n    )   \n    AS rate_codes\n    CROSS APPLY OPENJSON(jsonDoc)\n    WITH\n    (\n        rate_code_id SMALLINT,\n        rate_code VARCHAR(30)\n    );\n\n",
+					"query": "SELECT  rate_code_id, rate_code\nFROM\n    OPENROWSET(\n        BULK 'rate_code.json',\n        DATA_SOURCE = 'nyc_taxi_data_raw', \n        FORMAT = 'CSV',\n        \n        FIELDTERMINATOR = '0x0b',\n        ROWTERMINATOR = '0x0a',\n        FIELDQUOTE = '0x0b'\n    )WITH(\n\n        jsonDoc NVARCHAR(MAX)\n    )   \n    AS rate_codes\n    CROSS APPLY OPENJSON(jsonDoc)\n    \n    (\n        rate_code_id SMALLINT,\n        rate_code VARCHAR(30)\n    );\n\n",
 					"metadata": {
 						"language": "sql"
 					},
