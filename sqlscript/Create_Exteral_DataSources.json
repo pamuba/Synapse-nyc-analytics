@@ -1,0 +1,20 @@
+{
+	"name": "Create_Exteral_DataSources",
+	"properties": {
+		"folder": {
+			"name": "ldw"
+		},
+		"content": {
+			"query": "USE ny_taxi_ldw;\n\nCREATE EXTERNAL DATA SOURCE nyc_taxi_src\nWITH\n  ( \n    LOCATION = 'https://nycanalyticsmarlabsdl.dfs.core.windows.net/nyc-taxi-data' \n  );\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "ny_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
