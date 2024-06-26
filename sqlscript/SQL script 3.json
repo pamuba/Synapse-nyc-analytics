@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 3",
+	"properties": {
+		"content": {
+			"query": "IF NOT EXISTS (SELECT * FROM sys.external_file_formats WHERE name = 'SynapseDelimitedTextFormat') \n\tCREATE EXTERNAL FILE FORMAT [SynapseDelimitedTextFormat] \n\tWITH ( FORMAT_TYPE = DELIMITEDTEXT ,\n\t       FORMAT_OPTIONS (\n\t\t\t FIELD_TERMINATOR = ',',\n\t\t\t FIRST_ROW = 11,\n\t\t\t USE_TYPE_DEFAULT = FALSE\n\t\t\t))\nGO\n\nIF NOT EXISTS (SELECT * FROM sys.external_data_sources WHERE name = 'nyc-taxi-data_nycanalyticsmarlabsdl_dfs_core_windows_net') \n\tCREATE EXTERNAL DATA SOURCE [nyc-taxi-data_nycanalyticsmarlabsdl_dfs_core_windows_net] \n\tWITH (\n\t\tLOCATION = 'abfss://nyc-taxi-data@nycanalyticsmarlabsdl.dfs.core.windows.net' \n\t)\nGO\n\nCREATE EXTERNAL TABLE bronze.taxi_zone2 (\n\t[LocationID] bigint,\n\t[Borough] nvarchar(4000),\n\t[Zone] nvarchar(4000),\n\t[service_zone] nvarchar(4000)\n\t)\n\tWITH (\n\tLOCATION = 'raw/taxi_zone.csv',\n\tDATA_SOURCE = [nyc-taxi-data_nycanalyticsmarlabsdl_dfs_core_windows_net],\n\tFILE_FORMAT = [SynapseDelimitedTextFormat]\n\t)\nGO\n\n\nSELECT TOP 100 * FROM bronze.taxi_zone2\nGO",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "ny_taxi_ldw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
