@@ -157,13 +157,16 @@
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw"
+				},
 				"content": {
 					"query": "USE nyc_taxi_ldw;\n\n/*\nIF OBJECT_ID('silver.trip_data_green') IS NOT NULL\n    DROP EXTERNAL TABLE silver.trip_data_green\nGO\n\nCREATE EXTERNAL TABLE silver.trip_data_green\n    WITH\n    (\n        DATA_SOURCE = nyc_taxi_src,\n        LOCATION = 'silver/trip_data_green',\n        FILE_FORMAT = parquet_file_format\n    )\nAS\nSELECT *\n  FROM bronze.trip_data_green_csv;\n\n\nSELECT * FROM silver.trip_data_green; \n\n*/\n\nEXEC silver.usp_silver_trip_data_green '2020', '01'\nEXEC silver.usp_silver_trip_data_green '2020', '02'\nEXEC silver.usp_silver_trip_data_green '2020', '03'\nEXEC silver.usp_silver_trip_data_green '2020', '04'\nEXEC silver.usp_silver_trip_data_green '2020', '05'\nEXEC silver.usp_silver_trip_data_green '2020', '06'\nEXEC silver.usp_silver_trip_data_green '2020', '07'\nEXEC silver.usp_silver_trip_data_green '2020', '08'\nEXEC silver.usp_silver_trip_data_green '2020', '09'\nEXEC silver.usp_silver_trip_data_green '2020', '10'\nEXEC silver.usp_silver_trip_data_green '2020', '11'\nEXEC silver.usp_silver_trip_data_green '2020', '12'\nEXEC silver.usp_silver_trip_data_green '2021', '01'\nEXEC silver.usp_silver_trip_data_green '2021', '02'\nEXEC silver.usp_silver_trip_data_green '2021', '03'\nEXEC silver.usp_silver_trip_data_green '2021', '04'\nEXEC silver.usp_silver_trip_data_green '2021', '05'\nEXEC silver.usp_silver_trip_data_green '2021', '06'\n\n\n\n\n\n",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
-						"databaseName": "master",
+						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
@@ -177,13 +180,16 @@
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw"
+				},
 				"content": {
 					"query": "USE nyc_taxi_ldw\nGO \n\n-- Create view for trip_data_green\nDROP VIEW IF EXISTS silver.vw_trip_data_green\nGO\n\nCREATE VIEW silver.vw_trip_data_green\nAS\nSELECT\n    result.filepath(1) AS year,\n    result.filepath(2) AS month,\n    result.*\nFROM\n    OPENROWSET(\n        BULK 'silver/trip_data_green/year=*/month=*/*.parquet',\n        DATA_SOURCE = 'nyc_taxi_src',\n        FORMAT = 'PARQUET'\n    )\n    WITH (\n        vendor_id INT,\n        lpep_pickup_datetime datetime2(7),\n        lpep_dropoff_datetime datetime2(7),\n        store_and_fwd_flag CHAR(1),\n        rate_code_id INT,\n        pu_location_id INT,\n        do_location_id INT,\n        passenger_count INT,\n        trip_distance FLOAT,\n        fare_amount FLOAT,\n        extra FLOAT,\n        mta_tax FLOAT,\n        tip_amount FLOAT,\n        tolls_amount FLOAT,\n        ehail_fee INT,\n        improvement_surcharge FLOAT,\n        total_amount FLOAT,\n        payment_type INT,\n        trip_type INT,\n        congestion_surcharge FLOAT\n  ) AS [result]\nGO\n\nSELECT TOP(100) *\n  FROM silver.vw_trip_data_green\nGO",
 					"metadata": {
 						"language": "sql"
 					},
 					"currentConnection": {
-						"databaseName": "master",
+						"databaseName": "nyc_taxi_ldw",
 						"poolName": "Built-in"
 					},
 					"resultLimit": 5000
@@ -197,6 +203,9 @@
 			"type": "Microsoft.Synapse/workspaces/sqlscripts",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
+				"folder": {
+					"name": "nyc_taxi/ldw"
+				},
 				"content": {
 					"query": "USE nyc_taxi_ldw;\n\n/*\nCampaigns Requirement\nLet's start with the SELECT statement required to satisfy the requirement (1)\n*/\n\n/*\nSELECT td.year,\n       td.month,\n       tz.borough,\n       CONVERT(DATE, td.lpep_pickup_datetime) AS trip_date,\n       cal.day_name AS trip_day,\n       CASE WHEN cal.day_name IN ('Saturday','Sunday') THEN 'Y' ELSE 'N' END AS trip_day_weekend_ind,\n       SUM(CASE WHEN pt.description = 'Credit card' THEN 1 ELSE 0 END) AS card_trip_count,\n       SUM(CASE WHEN pt.description = 'Cash' THEN 1 ELSE 0 END) AS cash_trip_count\n  FROM silver.vw_trip_data_green td\n  JOIN silver.taxi_zone tz ON (td.pu_location_id = tz.location_id)\n  JOIN silver.calendar cal ON (cal.date = CONVERT(DATE, td.lpep_pickup_datetime))\n  JOIN silver.payment_type pt ON (td.payment_type = pt.payment_type)\nWHERE td.year = '2020'\n  AND td.month = '01'\nGROUP BY td.year,\n       td.month,\n       tz.borough,\n       CONVERT(DATE, td.lpep_pickup_datetime),\n       cal.day_name\n*/\n\n/*\nDemand Forecast Requirement\nLet's start with the SELECT statement required to satisfy the requirement (2)\n*/\n\n/*\nSELECT td.year,\n       td.month,\n       tz.borough,\n       CONVERT(DATE, td.lpep_pickup_datetime) AS trip_date,\n       cal.day_name AS trip_day,\n       CASE WHEN cal.day_name IN ('Saturday','Sunday') THEN 'Y' ELSE 'N' END AS trip_day_weekend_ind,\n       SUM(CASE WHEN pt.description = 'Credit card' THEN 1 ELSE 0 END) AS card_trip_count,\n       SUM(CASE WHEN pt.description = 'Cash' THEN 1 ELSE 0 END) AS cash_trip_count,\n       SUM(CASE WHEN tt.trip_type_desc = 'Street-hail' THEN 1 ELSE 0 END) AS street_hail_trip_count,\n       SUM(CASE WHEN tt.trip_type_desc = 'Dispatch' THEN 1 ELSE 0 END) AS dispatch_trip_count ,\n       SUM(td.trip_distance) AS trip_distance,\n       SUM(DATEDIFF(MINUTE, td.lpep_pickup_datetime, td.lpep_dropoff_datetime)) AS trip_duration,\n       SUM(td.fare_amount) AS fare_amount\n  FROM silver.vw_trip_data_green td\n  JOIN silver.taxi_zone tz ON (td.pu_location_id = tz.location_id)\n  JOIN silver.calendar cal ON (cal.date = CONVERT(DATE, td.lpep_pickup_datetime))\n  JOIN silver.payment_type pt ON (td.payment_type = pt.payment_type)\n  JOIN silver.trip_type tt ON (td.trip_type = tt.trip_type)\nWHERE td.year = '2020'\n  AND td.month = '01'\nGROUP BY td.year,\n       td.month,\n       tz.borough,\n       CONVERT(DATE, td.lpep_pickup_datetime),\n       cal.day_name;\n*/\n\nEXEC gold.usp_gold_trip_data_green '2020', '01';\nEXEC gold.usp_gold_trip_data_green '2020', '02';\nEXEC gold.usp_gold_trip_data_green '2020', '03';\nEXEC gold.usp_gold_trip_data_green '2020', '04';\nEXEC gold.usp_gold_trip_data_green '2020', '05';\nEXEC gold.usp_gold_trip_data_green '2020', '06';\nEXEC gold.usp_gold_trip_data_green '2020', '07';\nEXEC gold.usp_gold_trip_data_green '2020', '08';\nEXEC gold.usp_gold_trip_data_green '2020', '09';\nEXEC gold.usp_gold_trip_data_green '2020', '10';\nEXEC gold.usp_gold_trip_data_green '2020', '11';\nEXEC gold.usp_gold_trip_data_green '2020', '12';\nEXEC gold.usp_gold_trip_data_green '2021', '01';\nEXEC gold.usp_gold_trip_data_green '2021', '02';\nEXEC gold.usp_gold_trip_data_green '2021', '03';\nEXEC gold.usp_gold_trip_data_green '2021', '04';\nEXEC gold.usp_gold_trip_data_green '2021', '05';\nEXEC gold.usp_gold_trip_data_green '2021', '06';\n\n",
 					"metadata": {
