@@ -15,6 +15,10 @@
 		"nyc-analytics-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://nycanalyticsmarlabsdl.dfs.core.windows.net"
+		},
+		"ls_nycanalyticsmarlabsdl_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://nycanalyticsmarlabsdl.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -663,6 +667,25 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_nycanalyticsmarlabsdl')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_nycanalyticsmarlabsdl_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
 			]
 		}
 	]

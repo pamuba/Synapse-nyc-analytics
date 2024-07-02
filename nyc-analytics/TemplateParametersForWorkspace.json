@@ -10,6 +10,9 @@
 		},
 		"nyc-analytics-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://nycanalyticsmarlabsdl.dfs.core.windows.net"
+		},
+		"ls_nycanalyticsmarlabsdl_properties_typeProperties_url": {
+			"value": "https://nycanalyticsmarlabsdl.dfs.core.windows.net/"
 		}
 	}
 }
