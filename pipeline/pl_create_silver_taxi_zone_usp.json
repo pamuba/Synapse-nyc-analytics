@@ -1,5 +1,5 @@
 {
-	"name": "pl_create_silver_taxi_zone",
+	"name": "pl_create_silver_taxi_zone_usp",
 	"properties": {
 		"activities": [
 			{
