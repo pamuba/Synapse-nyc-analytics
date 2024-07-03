@@ -8,11 +8,11 @@
 		"nyc-analytics-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:nyc-analytics.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},
-		"nyc-analytics-WorkspaceDefaultStorage_properties_typeProperties_url": {
-			"value": "https://nycanalyticsmarlabsdl.dfs.core.windows.net"
-		},
 		"ls_nycanalyticsmarlabsdl_properties_typeProperties_url": {
 			"value": "https://nycanalyticsmarlabsdl.dfs.core.windows.net/"
+		},
+		"nyc-analytics-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://nycanalyticsmarlabsdl.dfs.core.windows.net"
 		}
 	}
 }
