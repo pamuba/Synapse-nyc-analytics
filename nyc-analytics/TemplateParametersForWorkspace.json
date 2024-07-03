@@ -11,6 +11,12 @@
 		"ls_nycanalyticsmarlabsdl_properties_typeProperties_url": {
 			"value": "https://nycanalyticsmarlabsdl.dfs.core.windows.net/"
 		},
+		"ls_serverless_sql_pool_nyc_taxi_data_properties_typeProperties_server": {
+			"value": "tcp:nyc-analytics-ondemand.sql.azuresynapse.net,1433"
+		},
+		"ls_serverless_sql_pool_nyc_taxi_data_properties_typeProperties_database": {
+			"value": "nyc_taxi_ldw"
+		},
 		"nyc-analytics-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://nycanalyticsmarlabsdl.dfs.core.windows.net"
 		}
