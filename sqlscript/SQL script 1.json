@@ -5,7 +5,7 @@
 			"name": "nyc_taxi/ldw"
 		},
 		"content": {
-			"query": "SELECT DISTINCT year, month FROM bronze.vw_trip_data_green_csv",
+			"query": "SELECT DISTINCT year, month FROM bronze.vw_trip_data_green_csv\n\nSELECT DISTINCT year, month FROM silver.vw_trip_data_green_csv;",
 			"metadata": {
 				"language": "sql"
 			},
