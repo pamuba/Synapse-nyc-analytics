@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "25398bb3-0832-4533-9e77-1f2e179306dd"
+				"spark.autotune.trackingId": "0e1ad9fb-ba4d-4e2c-972a-f4a2a09c2e0b"
 			}
 		},
 		"metadata": {
@@ -31,19 +31,12 @@
 				"name": "python"
 			},
 			"a365ComputeOptions": {
-				"id": "/subscriptions/dd2648ef-ea63-4552-9c1f-d541c58f4e1f/resourceGroups/AzureDemos/providers/Microsoft.Synapse/workspaces/nyc-analytics/bigDataPools/nycsparkpool",
+				"id": "subscriptions/*/resourceGroups/*/providers/Microsoft.Synapse/workspaces/*/bigDataPools/nycsparkpool",
 				"name": "nycsparkpool",
-				"type": "Spark",
-				"endpoint": "https://nyc-analytics.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/nycsparkpool",
 				"auth": {
 					"type": "AAD",
 					"authResource": "https://dev.azuresynapse.net"
-				},
-				"sparkVersion": "3.4",
-				"nodeCount": 3,
-				"cores": 4,
-				"memory": 28,
-				"automaticScaleJobs": false
+				}
 			},
 			"sessionKeepAliveTimeout": 30
 		},
@@ -83,7 +76,7 @@
 					}
 				},
 				"source": [
-					"spark.conf.set(\"spark.sql.sources.partitionColumnTypeInfrence.enabled\", \"false\")"
+					"#spark.conf.set(\"spark.sql.sources.partitionColumnTypeInfrence.enabled\", \"false\")"
 				],
 				"execution_count": 6
 			},
