@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "nyc-analytics"
 		},
+		"ls_cosmos_db_nyc_taxi_data_connectionString": {
+			"value": ""
+		},
 		"nyc-analytics-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:nyc-analytics.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
 		},

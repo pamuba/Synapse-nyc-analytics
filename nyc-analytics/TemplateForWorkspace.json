@@ -7,6 +7,10 @@
 			"metadata": "Workspace name",
 			"defaultValue": "nyc-analytics"
 		},
+		"ls_cosmos_db_nyc_taxi_data_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'ls_cosmos_db_nyc_taxi_data'"
+		},
 		"nyc-analytics-WorkspaceDefaultSqlServer_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'nyc-analytics-WorkspaceDefaultSqlServer'",
@@ -33,15 +37,6 @@
 		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
 	},
 	"resources": [
-		{
-			"name": "[concat(parameters('workspaceName'), '/taxisparkpool')]",
-			"type": "Microsoft.Synapse/workspaces/bigDataPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": []
-			},
-			"dependsOn": []
-		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/pl_create_gold_trip_data_green')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
@@ -770,55 +765,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/pl_execute_notebook')]",
-			"type": "Microsoft.Synapse/workspaces/pipelines",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"activities": [
-					{
-						"name": "Notebook Activity",
-						"type": "SynapseNotebook",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"notebook": {
-								"referenceName": "Notebook 1",
-								"type": "NotebookReference"
-							},
-							"snapshot": true,
-							"sparkPool": {
-								"referenceName": "taxisparkpool",
-								"type": "BigDataPoolReference"
-							},
-							"executorSize": "Small",
-							"conf": {
-								"spark.dynamicAllocation.enabled": false
-							},
-							"driverSize": "Small"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"folder": {
-					"name": "demo"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/notebooks/Notebook 1')]",
-				"[concat(variables('workspaceId'), '/bigDataPools/taxisparkpool')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/ds_silver_taxi_data_dynamic')]",
 			"type": "Microsoft.Synapse/workspaces/datasets",
 			"apiVersion": "2019-06-01-preview",
@@ -874,6 +820,25 @@
 			},
 			"dependsOn": [
 				"[concat(variables('workspaceId'), '/linkedServices/ls_nycanalyticsmarlabsdl')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_cosmos_db_nyc_taxi_data')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "CosmosDb",
+				"typeProperties": {
+					"connectionString": "[parameters('ls_cosmos_db_nyc_taxi_data_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
 			]
 		},
 		{
@@ -1607,7 +1572,27 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/Notebook 1')]",
+			"name": "[concat(parameters('workspaceName'), '/SQL script 3')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "IF (NOT EXISTS(SELECT * FROM sys.credentials WHERE name = 'marlabe-cosmos-db'))\n    CREATE CREDENTIAL [marlabe-cosmos-db]\n    WITH IDENTITY = 'SHARED ACCESS SIGNATURE', SECRET = ''\nGO\n\nSELECT TOP 100 *\nFROM OPENROWSET(​PROVIDER = 'CosmosDB',\n                CONNECTION = 'Account=marlabe-cosmos-db;Database=nyctaxi',\n                OBJECT = 'Heartbeat',\n                SERVER_CREDENTIAL = 'marlabe-cosmos-db'\n) AS [Heartbeat]\n",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Load_to_Dataframe')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -1627,7 +1612,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "f4ca988f-88c8-4c1f-8ebb-7a762db1d2d4"
+						"spark.autotune.trackingId": "da820ff6-4a2c-4940-8b88-fea2472b4c28"
 					}
 				},
 				"metadata": {
@@ -1660,138 +1645,22 @@
 					{
 						"cell_type": "code",
 						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							},
 							"collapsed": false
 						},
 						"source": [
-							"gold_folder_path = 'abfss://nyc-taxi-data@nycanalyticsmarlabsdl.dfs.core.windows.net/gold'\r\n",
-							"silver_folder_path = 'abfss://nyc-taxi-data@nycanalyticsmarlabsdl.dfs.core.windows.net/silver'\r\n",
-							"gold_folder_path = 'abfss://nyc-taxi-data@nycanalyticsmarlabsdl.dfs.core.windows.net/gold'"
+							"# Read from Cosmos DB analytical store into a Spark DataFrame and display 10 rows from the DataFrame\n",
+							"# To select a preferred list of regions in a multi-region Cosmos DB account, add .option(\"spark.cosmos.preferredRegions\", \"<Region1>,<Region2>\")\n",
+							"\n",
+							"df = spark.read\\\n",
+							"    .format(\"cosmos.olap\")\\\n",
+							"    .option(\"spark.synapse.linkedService\", \"ls_cosmos_db_nyc_taxi_data\")\\\n",
+							"    .option(\"spark.cosmos.container\", \"Heartbeat\")\\\n",
+							"    .load()\n",
+							"\n",
+							"display(df.limit(10))"
 						],
 						"outputs": [],
-						"execution_count": 1
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							"spark.conf.set(\"spark.sql.sources.partitionColumnTypeInfrence.enabled\", \"false\")"
-						],
-						"outputs": [],
-						"execution_count": 2
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							},
-							"microsoft": {
-								"language": "sparksql"
-							},
-							"collapsed": false
-						},
-						"source": [
-							"%%sql\r\n",
-							"\r\n",
-							"CREATE DATABASE IF NOT EXISTS nyc_taxi_ldw_spark\r\n",
-							"LOCATION 'abfss://nyc-taxi-data@nycanalyticsmarlabsdl.dfs.core.windows.net/gold'"
-						],
-						"outputs": [],
-						"execution_count": 3
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							"trip_data_green_df = spark.read.parquet(f\"{silver_folder_path}/trip_data_green\")\r\n",
-							"trip_data_green_df"
-						],
-						"outputs": [],
-						"execution_count": 7
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							"# total trip count\r\n",
-							"# total fare amount\r\n",
-							"\r\n",
-							"from pyspark.sql.functions import *\r\n",
-							"\r\n",
-							"\r\n",
-							"\r\n",
-							"trip_data_green_agg_df = trip_data_green_df \\\r\n",
-							"                         .groupBy(\"year\", \"month\", \"pu_location_id\", \"do_location_id\") \\\r\n",
-							"                         .agg(count(lit(1)).alias(\"total_trip_count\"),\r\n",
-							"                         round(sum(\"fare_amount\"), 2).alias(\"total_fare_amount\"))"
-						],
-						"outputs": [],
-						"execution_count": 8
-					},
-					{
-						"cell_type": "code",
-						"metadata": {
-							"jupyter": {
-								"source_hidden": false,
-								"outputs_hidden": false
-							},
-							"nteract": {
-								"transient": {
-									"deleting": false
-								}
-							}
-						},
-						"source": [
-							"trip_data_green_agg_df.write.mode(\"overwrite\").partitionBy(\"year\", \"month\") \\\r\n",
-							".format(\"parquet\").saveAsTable(\"nyc_taxi_ldw_spark.trip_data_green_agg\")"
-						],
-						"outputs": [],
-						"execution_count": 9
+						"execution_count": 5
 					}
 				]
 			},
