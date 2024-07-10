@@ -15,10 +15,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"notebook": {
-						"referenceName": "Notebook 1",
-						"type": "NotebookReference"
-					},
 					"snapshot": true,
 					"sparkPool": {
 						"referenceName": "taxisparkpool",
